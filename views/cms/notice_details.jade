@@ -1,0 +1,86 @@
+extends layouts/layout
+append loadtitle
+    -title += ' | 公告详情'
+
+append styles
+    //link(rel='stylesheet', href='/plugins/kindeditor-4.1.11/themes/default/default.css')
+    //link(rel='stylesheet', href='/plugins/kindeditor-4.1.11/plugins/code/prettify.css')
+    //link(rel='stylesheet', href='/plugins/jquery-file-upload/css/jquery.fileupload.css')
+
+block cms_content
+    .content_main
+        mixin toastr(status, msg)
+        .container-fluid
+            section.todo-content
+                div.panel-title.pll 公告详情
+                    small 公告详情维护
+            .col-md-12: .box.box-info
+                .box-header.with-border: h3.box-title 公告详情维护
+                form.form-horizontal(data-validate="parsley", method='post', action='/cms/notice/update')
+                    .box-body
+                        .col-sm-8
+                            .form-group
+                                input#id(name='id',type='hidden',value="#{notice.id}")
+                                label.col-sm-2.control-label(for='title') 公告标题
+                                .col-sm-10: input#title.form-control.parsley-validated(name='title',type='text',placeholder='公告标题',
+                                value="#{notice.title}",autocomplete="off",data-required="true")
+                            .form-group
+                                label.col-sm-2.control-label(for='content') 公告内容
+                                .col-sm-10: textarea#content.textarea.form-control.parsley-validated(name="content",placeholder="Enter text ...",
+                                rows="15") #{notice.content}
+                            .form-group
+                                label.col-sm-2.control-label(for='status') 公告状态
+                                .col-sm-4: input#status(name='status',type='checkbox',data-toggle="switch",checked=notice.status == 1,
+                                data-on-text="启用",data-off-text="禁用")
+                                label.col-sm-2.control-label(for='createtime') 发布日期
+                                .col-sm-4: input#createtime.form-control.parsley-validated(name='createtime',type='text',placeholder='发布日期',
+                                value="#{notice.createtime}",data-type="dateIso",data-required="true")
+                            .form-group
+                                label.col-sm-2.control-label(for='settop') 是否置顶
+                                .col-sm-4: input#settop(name='settop',type='checkbox',data-toggle="switch",checked=notice.settop == 1,
+                                data-on-text="置顶",data-off-text="不置顶")
+                                label.col-sm-2.control-label(for='views') 浏览次数
+                                .col-sm-4: input#views.form-control.parsley-validated(name='views',type='text',placeholder='浏览次数',
+                                value="#{notice.views}",disabled='disabled')
+                            .form-group: .col-sm-offset-2.col-sm-10
+                                a.btn.btn-default(type='button',href='/cms/notice') 取消更改
+                                input#btn_submit.btn.btn-info.mll(name='btn_submit',type='button',value='确认更改')
+
+append scripts
+    //script(type='text/javascript',src='/plugins/kindeditor-4.1.11/kindeditor-min.js')
+    //script(type='text/javascript',src='/plugins/kindeditor-4.1.11/lang/zh_CN.js')
+    //script(type='text/javascript',src='/plugins/kindeditor-4.1.11/plugins/code/prettify.js')
+    //script(type='text/javascript',src='/js/cms/KindEditorPageJS.js')
+    //script(type='text/javascript',src='/plugins/jquery-file-upload/js/jquery.fileupload-ajax.js')
+    script(type='text/javascript').
+        $("#btn_submit").on('click', function () {
+            //$("#content").val(editor.html());
+            //$("form").submit();
+
+            //表单验证
+            var valid = $("form").parsley().validate();
+            if (!valid)
+                return;
+
+            //表单验证通过：则提交
+            $.ajax({
+                url: "/cms/notice/update",
+                type: "post",
+                dataType: "json",
+                data: $("form").serialize(),
+                success: function (data) {
+                    if (data.status > 0) {
+                        toastrShow(data.status, data.msg);
+                        setTimeout(function () {
+                            window.location = "/cms/notice";
+                        }, '1500')
+                    }else{
+                        toastrShow(data.status, data.msg);
+                    }
+                }
+            });
+        });
+
+        $(document).ready(function () {
+            $("#createtime").datepicker({todayHighlight: true, format: 'yyyy-mm-dd', autoclose: true});
+        });

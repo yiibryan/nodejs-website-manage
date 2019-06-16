@@ -1,0 +1,33 @@
+extends layouts/layout
+append loadtitle
+    -title += ' | 新闻详情'
+
+block web_content
+    mixin toastr(status, msg)
+    section.container-body
+        .row
+            .col-sm-12.side-header 新闻详情
+            .col-sm-12.side-body
+                p.col-sm-12.text-center #{news.title}
+                .col-sm-12.text-center.news-sub-title
+                    span.mrl 发布时间：#{news.createtime}
+                    span.mrl 浏览次数：#{news.views + 1}
+                    a.mrl(href='/news/list') 返回列表
+                .col-sm-12
+                    span!= news.content
+
+append scripts
+    script(type = 'text/javascript').
+        $(document).ready(function () {
+            $.ajax({
+                url: "/views",
+                type: "post",
+                data: {type: "news", id: '#{news.id}', views: '#{news.views}'},
+                dataType: "json",
+                success: function (data) {
+                    if (data.status != 1) {
+                        toastrShow(data.status, data.msg);
+                    }
+                }
+            });
+        });

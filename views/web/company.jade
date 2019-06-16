@@ -1,0 +1,42 @@
+extends layouts/layout
+append loadtitle
+    -title += ' | 公司介绍'
+
+block web_content
+    mixin toastr(status, msg)
+    section.container-body
+        .row
+            .col-sm-12.side-header 公司介绍
+            .col-sm-12.side-body
+                span!= company.description
+        .row
+            .col-sm-12.side-header 公司档案
+            .col-sm-12.side-body
+                form.form-horizontal
+                    .form-group.mbn
+                        label.col-sm-2.control-label.prn: strong 公司名称：
+                        .col-sm-4.pln: span.form-control.noborder #{company.company_name}
+                        label.col-sm-2.control-label.prn: strong 公司类型：
+                        .col-sm-4.pln: span.form-control.noborder #{company.company_type}
+                    .form-group.mbn
+                        label.col-sm-2.control-label.prn: strong 所在地：
+                        .col-sm-4.pln: span.form-control.noborder #{company.address}
+                        label.col-sm-2.control-label.prn: strong 公司规模：
+                        .col-sm-4.pln: span.form-control.noborder #{company.company_size}
+                    .form-group.mbn
+                        label.col-sm-2.control-label.prn: strong 注册资本：
+                        .col-sm-4.pln: span.form-control.noborder #{company.regist_capital}
+                        label.col-sm-2.control-label.prn: strong 注册年份：
+                        .col-sm-4.pln: span.form-control.noborder #{company.regist_date}
+                    .form-group.mbn
+                        label.col-sm-2.control-label.prn: strong 经营模式：
+                        .col-sm-10.pln: span.form-control.noborder #{company.business_model}
+                    .form-group.mbn
+                        label.col-sm-2.control-label.prn: strong 经营范围：
+                        .col-sm-10.pln: span.form-control.noborder #{company.business_scope}
+                    //.form-group.mbn
+                    //    label.col-sm-2.control-label.prn: strong 销售产品：
+                    //    .col-sm-10.pln: span.form-control.noborder 锌锭 锌粉 氧化锌
+                    //.form-group.mbn
+                    //    label.col-sm-2.control-label.prn: strong 行业：
+                    //    .col-sm-10.pln: span.form-control.noborder 基本金属 / 锌 / 粗锌

@@ -1,0 +1,8 @@
+extends layouts/layout
+append loadtitle
+    -title += ' | 评论留言'
+
+block cms_content
+    .content_main
+        mixin toastr(status, msg)
+        .container-fluid

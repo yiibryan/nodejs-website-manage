@@ -1,0 +1,119 @@
+extends layouts/layout
+append loadtitle
+    -title += ' | 产品列表'
+
+block show_sider
+    -var show_contact = true;
+    -var show_category = false;
+
+block web_content
+    mixin toastr(status, msg)
+    section.container-body#listpage(ng-app="list",ng-controller="listCtrl")
+        .row
+            .col-sm-12.side-header 产品分类
+            .col-sm-12.side-body
+                div.col-sm-12.mlm.mbm
+                    span 选择产品分类 或者&nbsp;
+                    a(href='/product/list/0') 显示全部
+                ul.ul-web-vg
+                    li.col-sm-3.mbm(ng-repeat="item in categorylist"): a(ng-href='/product/list/{{item.id}}'): span(ng-bind="item.name")
+        .row
+            .col-sm-12.side-header(role="tablist") 产品列表
+                .pull-right: .mrm: a.a-inherit(href="#list-view",role="tab",data-toggle="tab")
+                    i.fa.fa-list(aria-hidden="true")
+                    span 列表浏览
+                .pull-right: .mrm: a.a-inherit(href="#th-view",role="tab",data-toggle="tab")
+                    i.fa.fa-th(aria-hidden="true")
+                    span 橱窗浏览
+            .tab-content
+                #list-view.col-sm-12.side-body.tab-pane.fade(role="tabpanel"): ul.ul-web-form
+                    li.col-sm-12
+                        .col-sm-3.text-center 产品图片
+                        .col-sm-7 产品名称
+                        .col-sm-2.text-center 发布日期
+                    li.col-sm-12(ng-repeat="item in lists")
+                        .col-sm-3.text-center: a(ng-href='/product/{{item.id}}'): img(ng-src='{{item.pic_url_loc}}',style='max-height=100px;max-width:100%;')
+                        .col-sm-7
+                            p: a(ng-href='/product/{{item.id}}'): span(ng-bind='item.name')
+                            //span 石家庄博鑫丰锌业有限公司 粗锌锭产品介绍：粗锌锭：本公司长期供应锌锭、锌粉。有意者速度来电。粗锌是锌制品回收到工厂然后通过
+                            //span(ng-bind-html='item.detail_info')
+                        .col-sm-2.text-center.pull-middle: span(ng-bind='item.publish_date')
+
+                #th-view.col-sm-12.side-body.tab-pane.fade(role="tabpanel").demo-browser.active.in
+                    .demo-browser-content
+                        .pro(ng-repeat="item in lists")
+                            a.a-inherit(ng-href='/product/{{item.id}}')
+                                img(ng-src='{{item.pic_url_loc}}')
+                                .pro-body
+                                    p.mbn: span(ng-bind='item.name')
+                                    p: span(ng-bind='item.publish_date')
+
+            .clearfix.pagination-jzk-right: .pagination-jzk.pull-right.mtn.mrn#pagination
+
+append scripts
+    script(type='text/javascript').
+        var app2 = angular.module('list', []);
+        app2.controller('listCtrl', function ($scope, $sce) {
+            $scope.lists = [];
+            $scope.categorylist = [];
+            var Pager = {
+                pageSize: 10,
+                LoadPage: function (recordCount, currentPage, CB) {
+                    currentPage = currentPage - 1;
+                    $("#pagination").pagination(recordCount, {
+                        num_display_entries: 5,
+                        num_edge_entries: 0,
+                        items_per_page: Pager.pageSize,
+                        current_page: currentPage,
+                        callback: function (page_index, jq) {
+                            if (Number(page_index) != currentPage) {
+                                Pager.GetData(page_index + 1);
+                            }
+                            return false;
+                        }
+                    });
+                },
+                GetData: function (index) {
+                    $.ajax({
+                        url: "/product/list/query",
+                        type: "post",
+                        dataType: "json",
+                        data: {
+                            categoryid: "#{categoryid}",
+                            page_index: index,
+                            page_size: Pager.pageSize
+                        },
+                        success: function (data) {
+                            if (data.status == 1) {
+                                Pager.LoadPage(data.recordCount, index);
+                                $scope.lists = data.data;
+                                for (var item in $scope.lists) {
+                                    $scope.lists[item].detail_info = $sce.trustAsHtml($scope.lists[item].detail_info);
+                                }
+                                $scope.$apply();
+                            }
+                        }
+                    });
+                },
+                GetCategory: function () {
+                    $.ajax({
+                        url: "/category/list/query",
+                        type: "post",
+                        dataType: "json",
+                        success: function (data) {
+                            if (data.status == 1) {
+                                $scope.categorylist = data.data;
+                                $scope.$apply();
+                            }
+                        }
+                    });
+                }
+            };
+            Pager.GetData(1);
+            Pager.GetCategory();
+            $scope.Pager = Pager;
+        });
+
+        angular.element(document).ready(function () {
+            angular.bootstrap(document.getElementById('listpage'), ['list']);
+        });

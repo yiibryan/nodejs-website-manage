@@ -1,0 +1,69 @@
+extends layouts/layout
+append loadtitle
+    -title += ' | 相册列表'
+
+block web_content
+    mixin toastr(status, msg)
+    section.container-body#listpage(ng-app="list",ng-controller="listCtrl")
+        .row
+            .col-sm-12.side-header 相册列表
+            .col-sm-12.side-body: ul.ul-web-form
+                li.col-sm-12
+                    .col-sm-4.text-center 相册
+                    .col-sm-4.text-center 相册名称
+                    .col-sm-4.text-center 创建日期
+                li.col-sm-12(ng-repeat="item in lists")
+                    .col-sm-4.text-center: a(ng-href='/photo/{{item.id}}')
+                        img(ng-src='{{item.pic_url_loc}}',height=100)
+                    .col-sm-4.text-center.pull-middle: a(ng-href='/photo/{{item.id}}'): span(ng-bind='item.photo_name')
+                    .col-sm-4.text-center.pull-middle: span(ng-bind='item.createtime')
+            .clearfix.pagination-jzk-right: .pagination-jzk.pull-right.mtn.mrn#pagination
+
+append scripts
+    script(type='text/javascript').
+        var app2 = angular.module('list', []);
+        app2.controller('listCtrl', function ($scope) {
+            $scope.lists = [];
+            var Pager = {
+                pageSize: 10,
+                LoadPage: function (recordCount, currentPage, CB) {
+                    currentPage = currentPage - 1;
+                    $("#pagination").pagination(recordCount, {
+                        num_display_entries: 5,
+                        num_edge_entries: 0,
+                        items_per_page: Pager.pageSize,
+                        current_page: currentPage,
+                        callback: function (page_index, jq) {
+                            if (Number(page_index) != currentPage) {
+                                Pager.GetData(page_index + 1);
+                            }
+                            return false;
+                        }
+                    });
+                },
+                GetData: function (index) {
+                    $.ajax({
+                        url: "/photo/list/query",
+                        type: "post",
+                        dataType: "json",
+                        data: {
+                            page_index: index,
+                            page_size: Pager.pageSize
+                        },
+                        success: function (data) {
+                            if (data.status == 1) {
+                                Pager.LoadPage(data.recordCount, index);
+                                $scope.lists = data.data;
+                                $scope.$apply();
+                            }
+                        }
+                    });
+                }
+            };
+            Pager.GetData(1);
+            $scope.Pager = Pager;
+        });
+
+        angular.element(document).ready(function () {
+            angular.bootstrap(document.getElementById('listpage'), ['list']);
+        });
